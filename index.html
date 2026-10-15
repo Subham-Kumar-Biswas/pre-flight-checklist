@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pre-Flight Checklist</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="main.js" defer></script>
+  </head>
+
+  <body>
+    <nav class="phase-stepper" aria-label="Pre-flight Phase Progress">
+      <ul class="stepper-list">
+        <li class="step-node active" data-phase="0">
+          <span class="step-index">01</span>
+          <span class="step-label">Pilot Fitness</span>
+        </li>
+
+        <li class="step-node locked" data-phase="1" aria-current="step">
+          <span class="step-index">02</span>
+          <span class="step-label">Aircraft Cabin</span>
+        </li>
+
+        <li class="step-node locked" data-phase="2">
+          <span class="step-index">03</span>
+          <span class="step-label">Propulsion Start</span>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="pilot-fitness">
+      <label for="illness">Illness</label>
+      <input type="checkbox" name="illness" id="illness" />
+
+      <label for="medication">Medication</label>
+      <input type="checkbox" name="medication" id="medication" />
+
+      <label for="stress">Stress</label>
+      <input type="checkbox" name="stress" id="stress" />
+
+      <label for="alcohol">Alcohol</label>
+      <input type="checkbox" name="alcohol" id="alcohol" />
+
+      <label for="fatigue">Fatigue</label>
+      <input type="checkbox" name="fatigue" id="fatigue" />
+
+      <label for="emotion">Emotion</label>
+      <input type="checkbox" name="emotion" id="emotion" />
+    </section>
+
+    <section class="aircraft-cabin hidden">
+      <label for="control-lock">Control Lock</label>
+      <input type="checkbox" name="control-lock" id="control-lock" />
+
+      <label for="ignition-switch">Ignition Switch</label>
+      <input type="checkbox" name="ignition-switch" id="ignition-switch" />
+
+      <label for="master-switch">Master Switch</label>
+      <input type="checkbox" name="master-switch" id="master-switch" />
+
+      <label for="fuel-quantity">Fuel Quantity</label>
+      <input type="checkbox" name="fuel-quantity" id="fuel-quantity" />
+
+      <label for="flaps-switch">Flaps Switch</label>
+      <input type="checkbox" name="flaps-switch" id="flaps-switch" />
+
+      <label for="master-switch-off">Master Switch Off</label>
+      <input type="checkbox" name="master-switch-off" id="master-switch-off" />
+    </section>
+
+    <section class="propulsion-start hidden">
+      <label for="fuel-selector">Fuel Selector</label>
+      <input type="checkbox" name="fuel-selector" id="fuel-selector" />
+
+      <label for="mixture-control">Mixture Control</label>
+      <input type="checkbox" name="mixture-control" id="mixture-control" />
+
+      <label for="throttle-lever">Throttle Lever</label>
+      <input type="checkbox" name="throttle-lever" id="throttle-lever" />
+
+      <label for="propeller-area">Propeller Area</label>
+      <input type="checkbox" name="propeller-area" id="propeller-area" />
+
+      <label for="starter-engage">Starter Engage</label>
+      <input type="checkbox" name="starter-engage" id="starter-engage" />
+    </section>
+
+    <button id="btn-transition" type="button">
+      Authorize Phase Transition
+    </button>
+  </body>
+</html>

@@ -1,0 +1,519 @@
+/* ==========================================================================
+   PRE-FLIGHT CHECKLIST — DESIGN SYSTEM
+   Theming: toggle `body.dark-mode` / `body.light-mode`.
+   Dark is the fallback if neither class is present.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+
+/* Theme-independent tokens */
+:root {
+  --font-ui:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --row-height: 56px;
+  --check-size: 22px;
+  --container-max: 760px;
+
+  --transition-fast: 140ms ease;
+}
+
+/* Dark mode (also the default fallback) */
+:root,
+body.dark-mode {
+  /* Warm graphite + avionics amber */
+  --color-canvas: #1b1a18;
+  --color-panel: #252320;
+  --color-border: #3b3833;
+  --color-text: #ece6da;
+  --color-text-muted: #9b9488;
+
+  --color-active: #e3a22f;
+  --color-safe: #6bae72;
+  --color-locked: #d9604a;
+
+  --color-on-active: #1b1a18; /* text on amber */
+  --color-on-safe: #141b15; /* checkmark on sage green */
+  --color-row-hover: rgba(227, 162, 47, 0.08);
+  --color-row-checked: rgba(107, 174, 114, 0.12);
+  --color-disabled-bg: #38352f;
+  --color-disabled-text: #8a8378;
+  --color-active-hover: #f0b648;
+  --shadow-panel: 0 1px 0 rgba(10, 8, 5, 0.4), 0 8px 24px rgba(10, 8, 5, 0.28);
+
+  color-scheme: dark;
+}
+
+/* Light mode */
+body.light-mode {
+  --color-canvas: #f6f8fa;
+  --color-panel: #ffffff;
+  --color-border: #d0d7de;
+  --color-text: #24292f;
+  --color-text-muted: #57606a;
+
+  --color-active: #0969da;
+  --color-safe: #1a7f37;
+  --color-locked: #cf222e;
+
+  --color-on-active: #ffffff;
+  --color-on-safe: #ffffff;
+  --color-row-hover: rgba(9, 105, 218, 0.06);
+  --color-row-checked: rgba(26, 127, 55, 0.08);
+  --color-disabled-bg: #d0d7de;
+  --color-disabled-text: #6e7781;
+  --color-active-hover: #0550ae;
+  --shadow-panel:
+    0 1px 0 rgba(31, 35, 40, 0.04), 0 4px 16px rgba(31, 35, 40, 0.08);
+
+  color-scheme: light;
+}
+
+/* --------------------------------------------------------------------------
+   2. BASE & RESET
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+/* --------------------------------------------------------------------------
+   3. LAYOUT — centered single-column grid
+   -------------------------------------------------------------------------- */
+
+body {
+  display: grid;
+  grid-template-columns: minmax(0, var(--container-max));
+  justify-content: center;
+  align-content: start;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-block: var(--space-6);
+    gap: var(--space-6);
+  }
+}
+
+/* Universal state-hiding utility */
+.hidden {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. PHASE BREADCRUMB TIMELINE
+   -------------------------------------------------------------------------- */
+
+.phase-stepper {
+  background-color: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+
+.stepper-list {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-node {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text);
+  border-bottom: 3px solid transparent;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.step-node + .step-node {
+  border-left: 1px solid var(--color-border);
+}
+
+.step-index {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.step-label {
+  max-width: 100%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Active — bottom indicator, no glow */
+.step-node.active {
+  border-bottom-color: var(--color-active);
+}
+
+.step-node.active .step-index {
+  color: var(--color-active);
+}
+
+/* Locked — dimmed and inert */
+.step-node.locked {
+  opacity: 0.55;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  cursor: default;
+}
+
+.step-node.locked .step-label,
+.step-node.locked .step-index {
+  color: var(--color-text-muted);
+}
+
+/* Completed — compliant clearance color */
+.step-node.completed {
+  border-bottom-color: var(--color-safe);
+}
+
+.step-node.completed .step-index,
+.step-node.completed .step-label {
+  color: var(--color-safe);
+}
+
+@media (max-width: 520px) {
+  .step-node {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .step-label {
+    font-size: 0.75rem;
+    white-space: normal;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. COCKPIT PANEL — checklist sections
+   Markup is a flat run of `label` + `input` siblings, so each pair is laid
+   out as one two-column grid row: [ label (flexible) | checkbox cell ].
+   -------------------------------------------------------------------------- */
+
+.pilot-fitness,
+.aircraft-cabin,
+.propulsion-start {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc(var(--row-height) + var(--space-3));
+  background-color: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+
+/* Row label cell */
+.pilot-fitness label,
+.aircraft-cabin label,
+.propulsion-start label {
+  display: flex;
+  align-items: center;
+  min-height: var(--row-height);
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  border-left: 3px solid transparent;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+/* Checkbox cell — custom control that fills the full row height */
+.pilot-fitness input[type="checkbox"],
+.aircraft-cabin input[type="checkbox"],
+.propulsion-start input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  display: block;
+  align-self: stretch;
+  width: 100%;
+  min-height: var(--row-height);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+/* Drop the final divider so the panel edge stays clean */
+.pilot-fitness > :nth-last-child(-n + 2),
+.aircraft-cabin > :nth-last-child(-n + 2),
+.propulsion-start > :nth-last-child(-n + 2) {
+  border-bottom-color: transparent;
+}
+
+/* Custom check box (outline) */
+.pilot-fitness input[type="checkbox"]::before,
+.aircraft-cabin input[type="checkbox"]::before,
+.propulsion-start input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--check-size);
+  height: var(--check-size);
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+/* Custom checkmark glyph */
+.pilot-fitness input[type="checkbox"]::after,
+.aircraft-cabin input[type="checkbox"]::after,
+.propulsion-start input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 11px;
+  border: solid var(--color-on-safe);
+  border-width: 0 2.5px 2.5px 0;
+  transform: translate(-50%, -62%) rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform var(--transition-fast);
+}
+
+/* Row hover — soft highlight across the whole row (label + checkbox cell) */
+.pilot-fitness label:hover,
+.aircraft-cabin label:hover,
+.propulsion-start label:hover,
+.pilot-fitness label:hover + input[type="checkbox"],
+.aircraft-cabin label:hover + input[type="checkbox"],
+.propulsion-start label:hover + input[type="checkbox"],
+.pilot-fitness input[type="checkbox"]:hover,
+.aircraft-cabin input[type="checkbox"]:hover,
+.propulsion-start input[type="checkbox"]:hover,
+.pilot-fitness label:has(+ input[type="checkbox"]:hover),
+.aircraft-cabin label:has(+ input[type="checkbox"]:hover),
+.propulsion-start label:has(+ input[type="checkbox"]:hover) {
+  background-color: var(--color-row-hover);
+}
+
+/* Hover — outline reacts so the control feels live */
+.pilot-fitness label:hover + input[type="checkbox"]:not(:checked)::before,
+.aircraft-cabin label:hover + input[type="checkbox"]:not(:checked)::before,
+.propulsion-start label:hover + input[type="checkbox"]:not(:checked)::before,
+.pilot-fitness input[type="checkbox"]:not(:checked):hover::before,
+.aircraft-cabin input[type="checkbox"]:not(:checked):hover::before,
+.propulsion-start input[type="checkbox"]:not(:checked):hover::before {
+  border-color: var(--color-active);
+}
+
+/* Checked — compliant state across the row */
+.pilot-fitness input[type="checkbox"]:checked::before,
+.aircraft-cabin input[type="checkbox"]:checked::before,
+.propulsion-start input[type="checkbox"]:checked::before {
+  background-color: var(--color-safe);
+  border-color: var(--color-safe);
+}
+
+.pilot-fitness input[type="checkbox"]:checked::after,
+.aircraft-cabin input[type="checkbox"]:checked::after,
+.propulsion-start input[type="checkbox"]:checked::after {
+  transform: translate(-50%, -62%) rotate(45deg) scale(1);
+}
+
+.pilot-fitness label:has(+ input[type="checkbox"]:checked),
+.aircraft-cabin label:has(+ input[type="checkbox"]:checked),
+.propulsion-start label:has(+ input[type="checkbox"]:checked) {
+  border-left-color: var(--color-safe);
+  background-color: var(--color-row-checked);
+}
+
+.pilot-fitness input[type="checkbox"]:checked,
+.aircraft-cabin input[type="checkbox"]:checked,
+.propulsion-start input[type="checkbox"]:checked {
+  background-color: var(--color-row-checked);
+}
+
+/* Keep hover visible on already-checked rows */
+.pilot-fitness label:has(+ input[type="checkbox"]:checked):hover,
+.aircraft-cabin label:has(+ input[type="checkbox"]:checked):hover,
+.propulsion-start label:has(+ input[type="checkbox"]:checked):hover,
+.pilot-fitness label:hover + input[type="checkbox"]:checked,
+.aircraft-cabin label:hover + input[type="checkbox"]:checked,
+.propulsion-start label:hover + input[type="checkbox"]:checked {
+  background-color: var(--color-row-hover);
+}
+
+/* Keyboard focus — inset ring around the checkbox cell, label echoes it */
+.pilot-fitness input[type="checkbox"]:focus-visible,
+.aircraft-cabin input[type="checkbox"]:focus-visible,
+.propulsion-start input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--color-active);
+  outline-offset: -2px;
+}
+
+.pilot-fitness label:has(+ input[type="checkbox"]:focus-visible),
+.aircraft-cabin label:has(+ input[type="checkbox"]:focus-visible),
+.propulsion-start label:has(+ input[type="checkbox"]:focus-visible) {
+  border-left-color: var(--color-active);
+}
+
+/* Disabled rows (if scripts lock individual items) */
+.pilot-fitness input[type="checkbox"]:disabled,
+.aircraft-cabin input[type="checkbox"]:disabled,
+.propulsion-start input[type="checkbox"]:disabled,
+.pilot-fitness label:has(+ input[type="checkbox"]:disabled),
+.aircraft-cabin label:has(+ input[type="checkbox"]:disabled),
+.propulsion-start label:has(+ input[type="checkbox"]:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Hard-fail rows (for scripts that flag a row with `aria-invalid="true"`) */
+.pilot-fitness input[type="checkbox"][aria-invalid="true"]::before,
+.aircraft-cabin input[type="checkbox"][aria-invalid="true"]::before,
+.propulsion-start input[type="checkbox"][aria-invalid="true"]::before {
+  border-color: var(--color-locked);
+}
+
+.pilot-fitness label:has(+ input[type="checkbox"][aria-invalid="true"]),
+.aircraft-cabin label:has(+ input[type="checkbox"][aria-invalid="true"]),
+.propulsion-start label:has(+ input[type="checkbox"][aria-invalid="true"]) {
+  border-left-color: var(--color-locked);
+}
+
+/* --------------------------------------------------------------------------
+   6. TRANSITION TRIGGER — #btn-transition
+   -------------------------------------------------------------------------- */
+
+#btn-transition {
+  justify-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background-color: var(--color-active);
+  color: var(--color-on-active);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+#btn-transition:hover:not(:disabled) {
+  background-color: var(--color-active-hover);
+}
+
+#btn-transition:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+#btn-transition:focus-visible {
+  outline: 2px solid var(--color-active);
+  outline-offset: 3px;
+}
+
+#btn-transition:disabled,
+#btn-transition[disabled] {
+  opacity: 0.6;
+  background-color: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  border-color: var(--color-border);
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (min-width: 768px) {
+  #btn-transition {
+    justify-self: end;
+    min-width: 280px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. ACCESSIBILITY
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
